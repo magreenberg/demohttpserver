@@ -2,6 +2,7 @@ package demo;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 
@@ -33,8 +34,8 @@ public class DemoHttpServer {
 			server = HttpServer.create(new InetSocketAddress(port), 0);
 			HttpContext rootContext = server.createContext("/");
 			rootContext.setHandler(DemoHttpServer::handleRootRequest);
-			HttpContext context = server.createContext("/gettime");
-			context.setHandler(DemoHttpServer::handleTimeRequest);
+//			HttpContext context = server.createContext("/gettime");
+//			context.setHandler(DemoHttpServer::handleTimeRequest);
 			server.start();
 			System.out.println("Started HTTP server on port " + port);
 		} catch (IOException e) {
@@ -42,20 +43,24 @@ public class DemoHttpServer {
 			System.exit(1);
 		}
 	}
-	
+
 	private static void handleRootRequest(HttpExchange exchange) throws IOException {
-		String message = "<h1>Hello! Append /gettime for a unique page</h1>";
+		String hostname = InetAddress.getLocalHost().getHostName();
+		if (hostname == null) {
+			hostname = InetAddress.getLocalHost().toString();
+		}
+		String message = "<h1>Hello from " + hostname + "! The time is " + Instant.now() + "</h1>";
 		exchange.sendResponseHeaders(HTTP_OK, message.getBytes().length);
 		OutputStream os = exchange.getResponseBody();
 		os.write(message.getBytes());
 		os.close();
 	}
 
-	private static void handleTimeRequest(HttpExchange exchange) throws IOException {
-		String message = "<h1>The time is now " + Instant.now() + "</h1>";
-		exchange.sendResponseHeaders(HTTP_OK, message.getBytes().length);
-		OutputStream os = exchange.getResponseBody();
-		os.write(message.getBytes());
-		os.close();
-	}
+//	private static void handleTimeRequest(HttpExchange exchange) throws IOException {
+//		String message = "<h1>The time is now " + Instant.now() + "</h1>";
+//		exchange.sendResponseHeaders(HTTP_OK, message.getBytes().length);
+//		OutputStream os = exchange.getResponseBody();
+//		os.write(message.getBytes());
+//		os.close();
+//	}
 }
